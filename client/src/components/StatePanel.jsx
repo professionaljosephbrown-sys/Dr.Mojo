@@ -88,7 +88,7 @@ export default function StatePanel({ code, metrics, national, meta, activeMetric
         <p>
           Typical homes here are priced{' '}
           <b>{Math.abs(m.overvaluation).toFixed(1)}% {m.overvaluation >= 0 ? 'above' : 'below'}</b>{' '}
-          their 2000–2019 long-term price trend.
+          their long-term price trend since 2000.
         </p>
         <DealGauge overvaluation={m.overvaluation} />
       </div>}

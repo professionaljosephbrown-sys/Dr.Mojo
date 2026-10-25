@@ -33,16 +33,35 @@ function marketScore({ yoy, inventoryYoY, daysOnMarket, priceCutShare }) {
   return Math.max(0, Math.min(100, Math.round(50 + 0.6 * raw)));
 }
 
+// Overvaluation: how far today's value sits above (+) or below (−) a log-linear trend
+// fitted to the area's whole Zillow history (2000 → today, covering the bubble, the
+// crash and the recent run-up). Needs at least 10 years of monthly data.
+const MIN_TREND_MONTHS = 120;
+function overvaluation(series) {
+  if (!series) return null;
+  const pts = Array.isArray(series)
+    ? series.map((p, t) => [t, p.value])
+    : series.values.map((v, t) => [t, v]).filter(([, v]) => v);
+  if (pts.length < MIN_TREND_MONTHS) return null;
+  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  for (const [t, v] of pts) { const y = Math.log(v); sx += t; sy += y; sxx += t * t; sxy += t * y; }
+  const n = pts.length;
+  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+  const a = (sy - b * sx) / n;
+  const [tLast, vLast] = pts.at(-1);
+  return round((vLast / Math.exp(a + b * tLast) - 1) * 100);
+}
+
 // Builds the metrics shown in the UI from one area's raw downloaded values.
 // `zillow` says whether home values at this level come from Zillow (else Realtor.com list prices).
-function deriveMetrics(r, zillow, rate) {
+function deriveMetrics(r, zillow, rate, zillowHistory) {
   const homeValue = zillow ? r.homeValue : r.listPrice;
   const yoy = zillow ? r.yoy : r.listPriceYoY;
   const metrics = {
     homeValue,
     yoy,
     forecast: r.forecast,
-    overvaluation: r.overvaluation,
+    overvaluation: zillow ? overvaluation(zillowHistory) : null,
     inventoryYoY: r.inventoryYoY,
     activeListings: r.activeListings,
     daysOnMarket: r.daysOnMarket,
@@ -80,7 +99,7 @@ function fromSnapshot(snap) {
 
   const states = STATES.map(([code, name, col, row]) => {
     const r = snap.states[code] || {};
-    const metrics = deriveMetrics(r, zillow, rate);
+    const metrics = deriveMetrics(r, zillow, rate, r.history);
     return {
       code, name, grid: { col, row }, metrics,
       history: (zillow ? r.history : r.listHistory) || [],
@@ -101,7 +120,7 @@ function fromSnapshot(snap) {
       mortgageRate: rate,
       homeValueSource: zillow ? 'zillow' : 'realtor',
       historyLabel: zillow ? 'Home value history (Zillow)' : 'Median list price history (Realtor.com)',
-      hasAreas: Boolean(snap.areaSources),
+      hasAreas: Boolean(snap.areaSources) && fs.existsSync(path.join(path.dirname(SNAPSHOT), 'areas')),
       sources,
     },
   };
@@ -178,13 +197,13 @@ export function loadAreas(code) {
 
   const counties = raw.counties.map((c) => ({
     id: c.fips, name: c.name,
-    metrics: deriveMetrics(c, zCounty, rate),
+    metrics: deriveMetrics(c, zCounty, rate, c.zhviHistory),
     lowSample: lowSample(c),
     history: (zCounty ? c.zhviHistory : c.listHistory) || null, // compact { start, values }
   }));
   const zips = raw.zips.map((z) => ({
     id: z.zip, name: z.zip, city: z.city || '', county: z.county, lat: z.lat, lon: z.lon,
-    metrics: deriveMetrics(z, zZip, rate),
+    metrics: deriveMetrics(z, zZip, rate, z.zhviHistory),
     lowSample: lowSample(z),
     history: (zZip ? z.zhviHistory : z.listHistory) || null,
   }));
@@ -192,7 +211,7 @@ export function loadAreas(code) {
   const result = {
     state: code,
     metrics: metricDefs([...counties, ...zips], zillowAny, 1),
-    stateMetrics: deriveMetrics(snap.states[code] || {}, zillowAny, rate),
+    stateMetrics: deriveMetrics(snap.states[code] || {}, zillowAny, rate, snap.states[code]?.history),
     historyLabel: zillowAny ? 'Home value history (Zillow)' : 'Median list price history (Realtor.com)',
     lowSampleThreshold: LOW_SAMPLE,
     counties,

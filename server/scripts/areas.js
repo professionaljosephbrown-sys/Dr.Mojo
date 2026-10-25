@@ -88,28 +88,13 @@ function compact(points) {
   return { start: points[0].date, values };
 }
 
-function logTrendAt(points, atIndex) {
-  const n = points.length;
-  if (n < 24) return null;
-  let sx = 0, sy = 0, sxx = 0, sxy = 0;
-  for (const { t, v } of points) { const y = Math.log(v); sx += t; sy += y; sxx += t * t; sxy += t * y; }
-  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const a = (sy - b * sx) / n;
-  return Math.exp(a + b * atIndex);
-}
-
-// Same Zillow math as the state level: latest value, YoY, overvaluation vs 2000–2019 trend.
+// Latest Zillow value and YoY change. (Overvaluation is calculated in data.js.)
 function zillowStats(series) {
   if (series.length < 13) return null;
   const latest = series.at(-1), yearAgo = series.at(-13);
-  const fit = series.map((p, t) => ({ ...p, t }))
-    .filter((p) => p.date >= '2000-01' && p.date <= '2019-12')
-    .map(({ t, value }) => ({ t, v: value }));
-  const trend = logTrendAt(fit, series.length - 1);
   return {
     homeValue: Math.round(latest.value),
     yoy: round((latest.value / yearAgo.value - 1) * 100),
-    overvaluation: trend ? round((latest.value / trend - 1) * 100) : null,
   };
 }
 
@@ -293,7 +278,11 @@ export async function buildAreas({ outDir, log = console.log }) {
       // Prefer the Census spelling when Realtor.com's name is missing or garbled (e.g. "Doña Ana")
       if (!c.name || c.name.includes('\uFFFD')) c.name = f.properties.name;
     }
-    const stateCounties = [...counties.values()].filter((c) => c.state === code);
+    // Keep current counties only: ones on the 2023 map or in Realtor.com's list.
+    // (Zillow still reports some retired counties, e.g. Connecticut's pre-2022 counties.)
+    const shapeIds = new Set(shapes.map((f) => f.id));
+    const stateCounties = [...counties.values()]
+      .filter((c) => c.state === code && (shapeIds.has(c.fips) || c.listPrice != null) && c.name);
     const pack = (rec) => {
       const { listHistory, zhviHistory, state, ...rest } = rec;
       return { ...rest, listHistory: compact(listHistory), zhviHistory: compact(zhviHistory) };

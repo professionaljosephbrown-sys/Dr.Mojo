@@ -29,7 +29,7 @@ export default function DrillDown({ areas, metric, stateName, selectedCounty, se
           </h2>
           <p className="muted">
             {county
-              ? `${countyZips.length} ZIP codes with listings. Click a dot or a row for details, or another county to move there.`
+              ? `${countyZips.length} ZIP codes with data. Click a dot or a row for details, or another county to move there.`
               : `${withData} of ${areas.counties.length} counties have data. Click a county to see its ZIP codes.`}
           </p>
         </div>

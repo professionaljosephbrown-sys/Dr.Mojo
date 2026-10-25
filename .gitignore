@@ -2,3 +2,4 @@ node_modules/
 client/dist/
 .env
 client/dist-static/
+server/data/areas/

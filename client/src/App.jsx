@@ -105,7 +105,7 @@ export default function App() {
           <h1>Find the best housing deals in America</h1>
           <p>
             {hasDeals
-              ? 'We analyze home prices, inventory and incomes to rate every market from Great Deal to Overpriced.'
+              ? `We compare home prices with their long-term trend${metrics.some((m) => m.key === 'income') ? ', local incomes' : ''} and inventory to rate every market from Great Deal to Overpriced.`
               : 'Compare prices, inventory, days on market and price cuts across every state.'}
           </p>
           <SearchBar states={states} onSelectState={select} onExplore={explore} canDrill={Boolean(meta?.hasAreas)} />

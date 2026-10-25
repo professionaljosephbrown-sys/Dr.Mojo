@@ -4,7 +4,7 @@
 //   npm run fetch-data            (from the server folder)
 //
 // Sources (all free, no login needed):
-//   • Zillow Home Value Index (ZHVI), state level, monthly   → home values, growth, price history, overvaluation
+//   • Zillow Home Value Index (ZHVI), state level, monthly   → home values, growth, price history
 //   • Zillow Home Value Forecast (ZHVF), state level         → 12-month forecast (optional)
 //   • Realtor.com Residential Data, state level, monthly     → listings, days on market, price cuts, list prices
 //   • US Census ACS 1-year estimates                         → household income, rent, population
@@ -73,17 +73,6 @@ const num = (v) => (v === undefined || v === '' || v === null || Number.isNaN(Nu
 const round = (n, d = 1) => (n == null ? null : Math.round(n * 10 ** d) / 10 ** d);
 const yyyymm = (s) => `${s.slice(0, 4)}-${s.slice(4, 6)}`;
 
-// Fit log(value) = a + b·t on a date range, return the trend value at index `atIndex`.
-function logTrendAt(points, atIndex) {
-  const n = points.length;
-  if (n < 24) return null;
-  let sx = 0, sy = 0, sxx = 0, sxy = 0;
-  for (const { t, v } of points) { const y = Math.log(v); sx += t; sy += y; sxx += t * t; sxy += t * y; }
-  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const a = (sy - b * sx) / n;
-  return Math.exp(a + b * atIndex);
-}
-
 // ---------- sources ----------
 async function zillowHomeValues() {
   const rows = parseCSV(await download(URLS.zhvi));
@@ -96,16 +85,10 @@ async function zillowHomeValues() {
     if (series.length < 13) continue;
     const latest = series.at(-1);
     const yearAgo = series.at(-13);
-    // Long-term trend: fit Jan 2000 – Dec 2019 (pre-pandemic) and extrapolate to today.
-    const fit = series
-      .map((p, t) => ({ ...p, t }))
-      .filter((p) => p.date >= '2000-01' && p.date <= '2019-12')
-      .map(({ t, value }) => ({ t, v: value }));
-    const trend = logTrendAt(fit, series.length - 1);
+    // (Overvaluation is calculated from this history in data.js.)
     out[code] = {
       homeValue: Math.round(latest.value),
       yoy: round((latest.value / yearAgo.value - 1) * 100),
-      overvaluation: trend ? round((latest.value / trend - 1) * 100) : null,
       history: series.slice(-HISTORY_MONTHS).map((p) => ({ date: p.date, value: Math.round(p.value) })),
     };
   }

@@ -54,14 +54,14 @@ cd server && npm run fetch-data   # writes server/data/snapshot.json, then resta
 | US Census 2023 county boundaries ([us-atlas-2023](https://github.com/severo/us-atlas-2023)) | County maps |
 | [GeoNames](https://www.geonames.org/) ZIP locations (CC BY 4.0, via `zipcodes-us`) | Placing ZIP codes on the map and in counties |
 
-County/ZIP files are written to `server/data/areas/` (one per state, ~35 MB in total). Downloading
+County/ZIP files are written to `server/data/areas/` (one per state, ~85 MB with Zillow history). They are not stored in git, so run `npm run fetch-data` once after cloning to turn on the drill-down. Downloading
 them takes a couple of minutes because Realtor.com's ZIP history file is ~800 MB (it is streamed,
 not stored). Use `npm run fetch-data -- --states-only` to refresh just the state data, or
 `--areas-only` for just counties and ZIP codes. ZIP codes with fewer than 10 listings are marked
 "few listings" because their numbers jump around.
 
 Derived metrics:
-- **Overvalued %** = today's Zillow value vs. a log-linear trend fitted to that state's 2000–2019 values.
+- **Overvalued %** = today's Zillow value vs. a log-linear trend fitted to the area's whole history since 2000 (needs 10+ years of data).
   This drives the deal ratings (Great Deal < 0%, Good < 8%, Fair < 16%, High Price < 25%, else Overpriced).
 - **Buyer / Seller score** (0–100) combines price growth, inventory growth, days on market and price cuts.
 - **Price-to-income** = home value ÷ median household income. **Mortgage** assumes 10% down, 30 years,

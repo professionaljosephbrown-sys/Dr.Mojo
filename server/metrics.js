@@ -8,7 +8,7 @@ export const METRICS = [
   { key: 'forecast', label: 'Home Price Forecast', format: 'percent', scale: 'diverging', source: 'Zillow ZHVF',
     description: "Zillow's forecast for home values over the next 12 months." },
   { key: 'overvaluation', label: 'Overvalued %', format: 'percent', scale: 'diverging', invert: true, source: 'Zillow ZHVI',
-    description: "How far today's home values sit above (+) or below (−) their 2000–2019 long-term trend." },
+    description: "How far today's home values sit above (+) or below (−) their long-term trend since 2000." },
   { key: 'inventoryYoY', label: 'Inventory Growth (YoY)', format: 'percent', scale: 'diverging', invert: true, source: 'Realtor.com',
     description: 'Change in active for-sale listings vs. a year ago. Rising inventory favors buyers.' },
   { key: 'activeListings', label: 'Homes for Sale', format: 'number', scale: 'sequential', source: 'Realtor.com',
