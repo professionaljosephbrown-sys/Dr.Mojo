@@ -117,3 +117,9 @@ function load() {
 }
 
 export const { states, metrics: METRICS, meta } = load();
+
+// US averages (simple mean across states that have the value)
+export const national = Object.fromEntries(METRICS.map((m) => {
+  const vals = states.map((s) => s.metrics[m.key]).filter((v) => v != null);
+  return [m.key, vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null];
+}));

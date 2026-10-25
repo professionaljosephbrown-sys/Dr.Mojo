@@ -28,6 +28,12 @@ Production:
 npm run build && npm start   # serves app + API on http://localhost:4000
 ```
 
+Static, no server needed (all data embedded in one HTML file you can host anywhere,
+e.g. GitHub Pages or Netlify):
+```bash
+npm run build:static         # writes client/dist-static/index.html
+```
+
 ## Real data
 
 ```bash

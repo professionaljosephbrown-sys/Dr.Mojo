@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { states, METRICS, meta } from './data.js';
+import { states, METRICS, meta, national } from './data.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -39,14 +39,7 @@ app.get('/api/rankings', (req, res) => {
 });
 
 // National averages (simple mean across states)
-app.get('/api/national', (_req, res) => {
-  const out = {};
-  for (const m of METRICS) {
-    const vals = states.map((s) => s.metrics[m.key]).filter((v) => v != null);
-    out[m.key] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-  }
-  res.json(out);
-});
+app.get('/api/national', (_req, res) => res.json(national));
 
 // In production, serve the built React app
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../client/dist');
