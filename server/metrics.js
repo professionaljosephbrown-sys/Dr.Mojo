@@ -1,0 +1,26 @@
+// Metric definitions shown in the UI.
+// `source` names where the real number comes from (see scripts/fetch-data.js).
+export const METRICS = [
+  { key: 'homeValue', label: 'Home Value', format: 'currency', scale: 'sequential', source: 'Zillow ZHVI',
+    description: 'Typical home value (Zillow Home Value Index, mid-tier homes).' },
+  { key: 'yoy', label: 'Home Value Growth (YoY)', format: 'percent', scale: 'diverging', source: 'Zillow ZHVI',
+    description: 'Change in typical home value over the last 12 months.' },
+  { key: 'forecast', label: 'Home Price Forecast', format: 'percent', scale: 'diverging', source: 'Zillow ZHVF',
+    description: "Zillow's forecast for home values over the next 12 months." },
+  { key: 'overvaluation', label: 'Overvalued %', format: 'percent', scale: 'diverging', invert: true, source: 'Zillow ZHVI',
+    description: "How far today's home values sit above (+) or below (−) their 2000–2019 long-term trend." },
+  { key: 'inventoryYoY', label: 'Inventory Growth (YoY)', format: 'percent', scale: 'diverging', invert: true, source: 'Realtor.com',
+    description: 'Change in active for-sale listings vs. a year ago. Rising inventory favors buyers.' },
+  { key: 'daysOnMarket', label: 'Days on Market', format: 'days', scale: 'sequential', invert: true, source: 'Realtor.com',
+    description: 'Median days a listing stays on the market.' },
+  { key: 'priceCutShare', label: 'Price Cut %', format: 'percent', scale: 'sequential', invert: true, source: 'Realtor.com',
+    description: 'Share of active listings that have had a price reduction.' },
+  { key: 'marketScore', label: 'Buyer / Seller Market', format: 'score', scale: 'diverging', center: 50, source: 'Dr. Mojo index',
+    description: "0 = strong buyer's market, 100 = strong seller's market. Combines price growth, inventory growth, days on market and price cuts." },
+  { key: 'priceToIncome', label: 'Price-to-Income Ratio', format: 'ratio', scale: 'sequential', invert: true, source: 'Zillow + Census',
+    description: 'Home value divided by median household income. Lower is more affordable.' },
+  { key: 'medianRent', label: 'Median Rent', format: 'currency', scale: 'sequential', source: 'Census ACS',
+    description: 'Median gross monthly rent (Census American Community Survey).' },
+  { key: 'popGrowth', label: 'Population Growth', format: 'percent', scale: 'diverging', source: 'Census ACS',
+    description: 'Change in population over the latest year (Census American Community Survey).' },
+];
