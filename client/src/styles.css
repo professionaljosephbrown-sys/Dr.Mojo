@@ -243,3 +243,54 @@ a { color: var(--blue); }
 .listing-price small { font-size: 12px; font-weight: 600; color: var(--muted); }
 .footer .sources a { color: #cfe1f5; }
 .footer .unavailable { color: #8296b0; }
+
+/* ---------- Drill-down ---------- */
+.explore-btn { width: 100%; margin: 4px 0 16px; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; margin-bottom: -6px; }
+.crumb { display: inline-flex; align-items: center; gap: 6px; }
+.crumb button { border: 0; background: none; padding: 0; font: inherit; color: var(--blue); font-weight: 600; cursor: pointer; }
+.crumb button:hover { text-decoration: underline; }
+.crumb span[aria-current] { font-weight: 700; }
+.crumb-sep { color: var(--muted); }
+.center-card { min-height: 300px; display: grid; place-items: center; color: var(--muted); }
+
+.countymap-wrap { position: relative; }
+.countymap { width: 100%; height: auto; display: block; background: #f7f9fb; border-radius: 6px; }
+.county { stroke: #fff; stroke-width: .6; cursor: pointer; transition: opacity .15s; vector-effect: non-scaling-stroke; }
+.county:hover { stroke: var(--blue); stroke-width: 1.6; }
+.county.selected { fill: #ffffff; stroke: var(--navy); stroke-width: 2; }
+.county.dimmed { fill: #e6eaef; }
+.county.dimmed:hover { fill: #d8dee6; }
+.zip-dot { stroke: #fff; stroke-width: 1.5; cursor: pointer; }
+.zip-dot:hover, .zip-dot.selected { stroke: var(--navy); stroke-width: 2.5; }
+.zip-dot.low { stroke-dasharray: 2 2; }
+.map-tip { transform: translate(-50%, calc(-100% - 12px)); }
+.tooltip em { font-style: normal; font-size: 12px; color: var(--high); }
+
+.table-title { font-size: 16px; font-weight: 700; margin: 18px 0 8px; }
+.area-table-wrap { max-height: 440px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.area-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.area-table th {
+  position: sticky; top: 0; background: #f5f7fa; text-align: left; padding: 9px 10px; font-weight: 700; color: var(--muted);
+  border-bottom: 1px solid var(--line); cursor: pointer; white-space: nowrap; user-select: none;
+}
+.area-table th.sorted { color: var(--blue); }
+.area-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.area-table .num { text-align: right; white-space: nowrap; }
+.area-table tbody tr { cursor: pointer; }
+.area-table tbody tr:hover { background: #f2f6fb; }
+.area-table tbody tr.selected { background: #e6effa; }
+.area-name { font-weight: 600; color: var(--blue); }
+.area-sub { color: var(--muted); margin-left: 6px; }
+.low-tag { margin-left: 6px; font-size: 11px; font-weight: 600; color: #8a5a00; background: #fff3dc; padding: 1px 6px; border-radius: 99px; }
+.warn { background: #fff7e6; border: 1px solid #f3d9a4; color: #6b4a00; font-size: 13px; padding: 8px 12px; border-radius: var(--radius); margin: 0 0 12px; }
+.loading-row { cursor: default !important; }
+
+/* ---------- Chart range tabs ---------- */
+.chart-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.chart-top .chart-label { height: auto; }
+.range-tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.range-tabs button { border: 0; background: #fff; font: inherit; font-size: 12px; font-weight: 600; padding: 4px 9px; cursor: pointer; color: var(--muted); }
+.range-tabs button + button { border-left: 1px solid var(--line); }
+.range-tabs button.active { background: var(--blue); color: #fff; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }

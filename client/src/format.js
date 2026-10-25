@@ -4,6 +4,7 @@ export function formatValue(value, format) {
   if (value == null || Number.isNaN(value)) return '—';
   switch (format) {
     case 'currency':
+      if (value >= 1e6) return `$${(value / 1e6).toFixed(value >= 1e7 ? 1 : 2)}M`;
       return value >= 100000 ? `$${Math.round(value / 1000)}K` : usd.format(value);
     case 'percent':
       return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
@@ -13,6 +14,8 @@ export function formatValue(value, format) {
       return `${value.toFixed(1)}x`;
     case 'score':
       return `${Math.round(value)}`;
+    case 'number':
+      return Math.round(value).toLocaleString('en-US');
     default:
       return String(value);
   }
@@ -94,3 +97,17 @@ export const DEALS = [
   { max: Infinity, label: 'Overpriced', cls: 'over', color: '#d0021b' },
 ];
 export const dealRating = (overvaluation) => DEALS.find((d) => overvaluation < d.max);
+
+// History comes either as [{ date, value }] or compact { start: 'YYYY-MM', values: [...] }.
+export function toPoints(history) {
+  if (!history) return [];
+  if (Array.isArray(history)) return history;
+  const [y, m] = history.start.split('-').map(Number);
+  const out = [];
+  history.values.forEach((value, i) => {
+    if (value == null) return;
+    const d = new Date(Date.UTC(y, m - 1 + i, 1));
+    out.push({ date: d.toISOString().slice(0, 7), value });
+  });
+  return out;
+}

@@ -9,7 +9,12 @@
     "fetch-data": "node scripts/fetch-data.js"
   },
   "dependencies": {
+    "@severo_bo/us-atlas-2023": "^4.0.0",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "d3-geo": "^3.1.1",
+    "express": "^4.21.2",
+    "topojson-client": "^3.1.0",
+    "zipcodes-us": "^1.2.0"
   }
 }

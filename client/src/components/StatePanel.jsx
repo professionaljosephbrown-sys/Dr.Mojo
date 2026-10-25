@@ -28,7 +28,7 @@ function DealGauge({ overvaluation }) {
   );
 }
 
-export default function StatePanel({ code, metrics, national, meta, activeMetric, onClose }) {
+export default function StatePanel({ code, metrics, national, meta, activeMetric, onClose, onExplore }) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
@@ -67,6 +67,12 @@ export default function StatePanel({ code, metrics, national, meta, activeMetric
         </div>
         <button className="close" onClick={onClose} aria-label="Close">×</button>
       </div>
+
+      {onExplore && (
+        <button className="btn-primary explore-btn" onClick={onExplore}>
+          Explore counties &amp; ZIP codes →
+        </button>
+      )}
 
       <div className="hero-stat">
         <span className="muted">{priceLabel}</span>

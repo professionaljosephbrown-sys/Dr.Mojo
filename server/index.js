@@ -3,11 +3,13 @@ import cors from 'cors';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { states, METRICS, meta, national } from './data.js';
+import compression from 'compression';
+import { states, METRICS, meta, national, loadAreas, loadSearchIndex } from './data.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 app.use(cors());
+app.use(compression());
 
 const summary = (s) => ({ code: s.code, name: s.name, grid: s.grid, metrics: s.metrics });
 
@@ -22,6 +24,20 @@ app.get('/api/states/:code', (req, res) => {
   const s = states.find((x) => x.code === req.params.code.toUpperCase());
   if (!s) return res.status(404).json({ error: 'State not found' });
   res.json(s);
+});
+
+// Counties + ZIP codes for one state, with history and county map shapes
+app.get('/api/states/:code/areas', (req, res) => {
+  const areas = loadAreas(req.params.code);
+  if (!areas) return res.status(404).json({ error: 'No county/ZIP data. Run npm run fetch-data.' });
+  res.json(areas);
+});
+
+// ZIP + county lookup for the search box
+app.get('/api/search-index', (_req, res) => {
+  const index = loadSearchIndex();
+  if (!index) return res.status(404).json({ error: 'No county/ZIP data. Run npm run fetch-data.' });
+  res.json(index);
 });
 
 // Ranked list for a metric: /api/rankings?metric=yoy&order=desc&limit=10

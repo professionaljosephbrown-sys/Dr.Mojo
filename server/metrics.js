@@ -11,6 +11,8 @@ export const METRICS = [
     description: "How far today's home values sit above (+) or below (−) their 2000–2019 long-term trend." },
   { key: 'inventoryYoY', label: 'Inventory Growth (YoY)', format: 'percent', scale: 'diverging', invert: true, source: 'Realtor.com',
     description: 'Change in active for-sale listings vs. a year ago. Rising inventory favors buyers.' },
+  { key: 'activeListings', label: 'Homes for Sale', format: 'number', scale: 'sequential', source: 'Realtor.com',
+    description: 'Number of active for-sale listings.' },
   { key: 'daysOnMarket', label: 'Days on Market', format: 'days', scale: 'sequential', invert: true, source: 'Realtor.com',
     description: 'Median days a listing stays on the market.' },
   { key: 'priceCutShare', label: 'Price Cut %', format: 'percent', scale: 'sequential', invert: true, source: 'Realtor.com',

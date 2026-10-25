@@ -11,6 +11,9 @@ color-coded state map, see rankings, and drill into any state.
 - Deal ratings for every market (Great Deal → Overpriced) plus a "Dr. Mojo Fair Value" estimate and gauge
 - State search with autocomplete
 - Tile-grid US map colored by the selected metric (hover for tooltip, click to select)
+- Drill down from state → county → ZIP code: county map for each state, zoom into a county to see its ZIP codes
+- Full price history (Realtor.com since 2016, Zillow since 2000) with 1Y / 3Y / 5Y / 10Y / All ranges
+- Search by state, county or ZIP code
 - 11 metrics: home value, YoY growth, 12‑mo forecast, overvaluation, inventory growth,
   days on market, price cuts, buyer/seller score, price-to-income, rent, population growth
 - State panel: 3-year price chart, forecast, comparison to US average, buy-vs-rent
@@ -31,7 +34,7 @@ npm run build && npm start   # serves app + API on http://localhost:4000
 Static, no server needed (all data embedded in one HTML file you can host anywhere,
 e.g. GitHub Pages or Netlify):
 ```bash
-npm run build:static         # writes client/dist-static/index.html
+npm run build:static         # writes client/dist-static/ (index.html + areas/*.json)
 ```
 
 ## Real data
@@ -46,6 +49,16 @@ cd server && npm run fetch-data   # writes server/data/snapshot.json, then resta
 | Zillow Home Value Forecast (state) | 12-month forecast (optional; skipped if the file isn't published at state level) |
 | [Realtor.com Residential Data](https://www.realtor.com/research/data/) (state, monthly) | Inventory growth, days on market, price cuts; list prices as a fallback when Zillow is missing |
 | [Census ACS 1-year](https://www.census.gov/programs-surveys/acs) | Household income, median rent, population growth |
+| Realtor.com county + ZIP files (current and monthly history) | County and ZIP code drill-down |
+| Zillow county + ZIP home values (optional) | County/ZIP home values and history back to 2000 |
+| US Census 2023 county boundaries ([us-atlas-2023](https://github.com/severo/us-atlas-2023)) | County maps |
+| [GeoNames](https://www.geonames.org/) ZIP locations (CC BY 4.0, via `zipcodes-us`) | Placing ZIP codes on the map and in counties |
+
+County/ZIP files are written to `server/data/areas/` (one per state, ~35 MB in total). Downloading
+them takes a couple of minutes because Realtor.com's ZIP history file is ~800 MB (it is streamed,
+not stored). Use `npm run fetch-data -- --states-only` to refresh just the state data, or
+`--areas-only` for just counties and ZIP codes. ZIP codes with fewer than 10 listings are marked
+"few listings" because their numbers jump around.
 
 Derived metrics:
 - **Overvalued %** = today's Zillow value vs. a log-linear trend fitted to that state's 2000–2019 values.
@@ -67,11 +80,14 @@ Re-run `npm run fetch-data` monthly to refresh.
 | `GET /api/rankings?metric=yoy&order=desc&limit=10` | Ranked states |
 | `GET /api/national` | US averages |
 | `GET /api/meta` | Data sources, freshness, which sources loaded |
+| `GET /api/states/:code/areas` | Counties + ZIP codes for a state, with history and county shapes |
+| `GET /api/search-index` | ZIP → state/city/county lookup and county list for search |
 
 ## Structure
 ```
 server/   index.js (Express routes), data.js (builds metrics from the snapshot),
-          scripts/fetch-data.js (downloads sources), metrics.js, states-list.js,
+          scripts/fetch-data.js (downloads sources), scripts/areas.js (counties + ZIPs),
+          scripts/build-static.js, metrics.js, states-list.js,
           sample-data.js (demo fallback), data/snapshot.json (downloaded data)
 client/   src/App.jsx, src/components/*, src/format.js (formatting + color scales)
 ```

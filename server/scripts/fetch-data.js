@@ -8,6 +8,9 @@
 //   • Zillow Home Value Forecast (ZHVF), state level         → 12-month forecast (optional)
 //   • Realtor.com Residential Data, state level, monthly     → listings, days on market, price cuts, list prices
 //   • US Census ACS 1-year estimates                         → household income, rent, population
+//   • County + ZIP code data for the drill-down view (see areas.js)
+//
+// Flags: --states-only (skip counties/ZIPs, much faster), --areas-only (keep current state data)
 //
 // Each source is optional: if one can't be downloaded the script records why
 // and keeps going, and the site hides the metrics that depend on it.
@@ -17,6 +20,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STATES } from '../states-list.js';
+import { buildAreas } from './areas.js';
 
 const OUT = process.env.SNAPSHOT_OUT ||
   path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../data/snapshot.json');
@@ -33,7 +37,8 @@ const URLS = {
 
 const byName = new Map(STATES.map(([code, name]) => [name.toLowerCase(), code]));
 const codes = new Set(STATES.map(([code]) => code));
-const HISTORY_MONTHS = 36;
+// Keep full monthly history (Zillow: since 2000, Realtor.com: since mid-2016)
+const HISTORY_MONTHS = Infinity;
 
 // ---------- helpers ----------
 async function download(url) {
@@ -203,6 +208,18 @@ const SOURCES = [
   { id: 'census', name: 'US Census ACS 1-year', url: 'https://www.census.gov/programs-surveys/acs', run: census },
 ];
 
+const args = new Set(process.argv.slice(2));
+const AREAS_DIR = path.join(path.dirname(OUT), 'areas');
+
+if (args.has('--areas-only')) {
+  const snap = JSON.parse(await fs.readFile(OUT, 'utf8'));
+  snap.areaSources = await buildAreas({ outDir: AREAS_DIR });
+  snap.areasGeneratedAt = new Date().toISOString();
+  await fs.writeFile(OUT, JSON.stringify(snap, null, 1));
+  console.log(`\nUpdated ${path.relative(process.cwd(), OUT)}`);
+  process.exit(0);
+}
+
 const snapshot = {
   generatedAt: new Date().toISOString(),
   mortgageRate: Number(process.env.MORTGAGE_RATE) || 6.25,
@@ -229,6 +246,18 @@ if (!Object.values(snapshot.sources).some((s) => s.ok)) {
   console.error('\nNo sources could be downloaded; snapshot not written.');
   process.exit(1);
 }
+if (args.has('--states-only')) {
+  // Keep the existing county/ZIP files' source info
+  try {
+    const old = JSON.parse(await fs.readFile(OUT, 'utf8'));
+    if (old.areaSources) { snapshot.areaSources = old.areaSources; snapshot.areasGeneratedAt = old.areasGeneratedAt; }
+  } catch { /* no previous snapshot */ }
+} else {
+  console.log('\nCounties and ZIP codes:');
+  snapshot.areaSources = await buildAreas({ outDir: AREAS_DIR });
+  snapshot.areasGeneratedAt = new Date().toISOString();
+}
+
 await fs.mkdir(path.dirname(OUT), { recursive: true });
 await fs.writeFile(OUT, JSON.stringify(snapshot, null, 1));
 console.log(`\nWrote ${path.relative(process.cwd(), OUT)}`);
